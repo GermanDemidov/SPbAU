@@ -39,10 +39,10 @@ def cross_or_bound(point, edge):
             return 0
         else:
             return 1
-    elif left_or_right(point, edge) in [0, 1, 2]:
-        return 2
-    else:
+    elif left_or_right(point, edge) == 5:
         return 1
+    else:
+        return 2
 
 
 
@@ -94,7 +94,7 @@ def parse_and_initialize(filename):
 
 def understand_in_or_not(points_to_check, polygon):
     for point in points_to_check:
-        if polygon.where_is_point(point) in [0, 1]:
+        if polygon.where_is_point(point) != 2:
             print "YES"
         else:
             print "NO"
