@@ -11,13 +11,12 @@ class Polygon:
         max_x = self.points[0][0]
         for i in range(len(self.points)):
             if self.points[i] > max_x:
-                max_x = self.points[i]
+                max_x = self.points[i][0]
                 maxindex = i
             else:
                 break
-        self.bottom_points = self.points[:maxindex]
-        self.top_points = self.points[maxindex:]
-        self.events = self.points[:maxindex]
+        self.bottom_points = self.points[:maxindex - 1]
+        self.top_points = self.points[maxindex - 1:]
         self.events = sorted(self.points)
         
     def __str__(self):
@@ -60,11 +59,12 @@ def triangulate(polygon):
     for i in range(2, len(polygon.points)):
         tmp = polygon.events[i]
         stack_top = stack[len(stack) - 1]
-        if not (tmp in polygon.top_points and stack_top in polygon.top_points):
+        if not ((tmp in polygon.top_points) == (stack_top in polygon.top_points)):
             while len(stack) > 1:
                 fst = stack.pop()
                 snd = stack[len(stack) - 1]
                 ans.append(Triangle([tmp, fst, snd]))
+                # print "ANS1", [tmp, fst, snd]
             stack.pop()
             stack.append(stack_top)
             stack.append(tmp)
@@ -73,11 +73,12 @@ def triangulate(polygon):
                 fst = stack[len(stack) - 1]
                 snd = stack[len(stack) - 2]
                 orient = orientation(tmp, snd, fst)
-                if (orient == 0) or not ((orient == -1) == (fst in polygon.top_points)):
+                if (orient == 0) or ((orient == -1) != (fst in polygon.top_points)):
                     break
                 else:
                     stack.pop()
                     ans.append(Triangle([tmp, fst, snd]))
+                    # print "ANS2", [tmp, fst, snd]
             stack.append(tmp)
     for elem in ans:
         lst = []
