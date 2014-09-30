@@ -75,8 +75,9 @@ def triangulate(polygon):
                 orient = orientation(tmp, snd, fst)
                 if (orient == 0) or not ((orient == -1) == (fst in polygon.top_points)):
                     break
-                stack.pop()
-                ans.append(Triangle([tmp, fst, snd]))
+                else:
+                    stack.pop()
+                    ans.append(Triangle([tmp, fst, snd]))
             stack.append(tmp)
     for elem in ans:
         lst = []
