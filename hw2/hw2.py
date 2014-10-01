@@ -2,27 +2,59 @@
 
 from ast import literal_eval as make_tuple
 import sys
+
+
+def merge(l, r):
+    result = []
+    indexes = []
+    i = j = 0
+    while i < len(l) and j < len(r):
+        if l[i] < r[j]:
+            result.append(l[i])
+            indexes.append(i)
+            i += 1
+        else:
+            result.append(r[j])
+            indexes.append(len(r) - 1 - j + len(l))
+            j += 1
+    result += l[i:]
+    for k in range(i, len(l)):
+        indexes.append(k)
+    result += r[j:]
+    for k in range(j, len(r)):
+        indexes.append(len(r) - 1 - j + len(l))
+    return result, indexes
         
 
 class Polygon:
     def __init__(self, list_of_points):
         self.points = tuple(list_of_points)
-        maxindex = 0
+        self.maxindex = 0
         max_x = self.points[0][0]
         for i in range(len(self.points)):
             if self.points[i] > max_x:
                 max_x = self.points[i][0]
-                maxindex = i
+                self.maxindex = i
             else:
                 break
-        self.bottom_points = {}
+
+        list1 = list(self.points[:self.maxindex - 1])
+        list2 = list(reversed(self.points[self.maxindex - 1:]))
+
+        """self.bottom_points = {}
         self.top_points = {}
         for i in range(maxindex - 1):
             self.bottom_points[self.points[i]] = i
         for i in range(len(self.points) - 1, maxindex - 2, -1):
-            self.top_points[self.points[i]] = i
+            self.top_points[self.points[i]] = i"""
 
-        self.events = sorted(self.points)
+        self.event, indexes = merge(list1, list2)
+        self.events = indexes
+
+    def from_top_chain(self, point):
+        if point >= self.maxindex:
+            return True
+        return False
         
     def __str__(self):
         return str(self.points)
@@ -40,10 +72,7 @@ class Triangle:
             print "Not a Triangle", list_of_points
 
     def __str__(self):
-        string = ""
-        for point in self.points:
-            string += str(point)
-        return string
+        return str(tuple(self.points))
 
 def orientation(a, b, c):
     det = (b[0] - a[0]) * (c[1] - a[1]) - (c[0] - a[0]) * (b[1] - a[1])
@@ -64,7 +93,7 @@ def triangulate(polygon):
     for i in range(2, len(polygon.points)):
         tmp = polygon.events[i]
         stack_top = stack[len(stack) - 1]
-        if not ((tmp in polygon.top_points) == (stack_top in polygon.top_points)):
+        if not ((polygon.from_top_chain(tmp)) == (polygon.from_top_chain(stack_top))):
             while len(stack) > 1:
                 fst = stack.pop()
                 snd = stack[len(stack) - 1]
@@ -77,8 +106,8 @@ def triangulate(polygon):
             while len(stack) > 1:
                 fst = stack[len(stack) - 1]
                 snd = stack[len(stack) - 2]
-                orient = orientation(tmp, snd, fst)
-                if (orient == 0) or ((orient == -1) != (fst in polygon.top_points)):
+                orient = orientation(polygon.points[tmp], polygon.points[snd], polygon.points[fst])
+                if (orient == 0) or ((orient == -1) != (polygon.from_top_chain(fst))):
                     break
                 else:
                     stack.pop()
@@ -86,13 +115,7 @@ def triangulate(polygon):
                     # print "ANS2", [tmp, fst, snd]
             stack.append(tmp)
     for elem in ans:
-        lst = []
-        for point in elem.points:
-            if point in polygon.top_points:
-                lst.append(polygon.top_points[point])
-            else:
-                lst.append(polygon.bottom_points[point])
-        print tuple(sorted(lst))
+        print elem
     return ans
    
 def parse_and_initialize(filename):
