@@ -15,8 +15,13 @@ class Polygon:
                 maxindex = i
             else:
                 break
-        self.bottom_points = self.points[:maxindex - 1]
-        self.top_points = self.points[maxindex - 1:]
+        self.bottom_points = {}
+        self.top_points = {}
+        for i in range(maxindex - 1):
+            self.bottom_points[self.points[i]] = i
+        for i in range(len(self.points) - 1, maxindex - 2, -1):
+            self.top_points[self.points[i]] = i
+
         self.events = sorted(self.points)
         
     def __str__(self):
@@ -83,7 +88,10 @@ def triangulate(polygon):
     for elem in ans:
         lst = []
         for point in elem.points:
-            lst.append(polygon.points.index(point))
+            if point in polygon.top_points:
+                lst.append(polygon.top_points[point])
+            else:
+                lst.append(polygon.bottom_points[point])
         print tuple(sorted(lst))
     return ans
    
