@@ -356,7 +356,9 @@ public class ChanHull {
     }
 
     public ArrayList<Edge> getEdges(){
-        algo();
+        if (selfPoints.size() > 2) {
+            algo();
+        }
         return edges;
     }
 
